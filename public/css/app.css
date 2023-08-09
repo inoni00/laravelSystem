@@ -54,15 +54,40 @@ img {
 /* 検索ボタンのスタイル */
 .mb-3.form-inline button {
     margin-left: 10px;
+    color: blue;
 }
 
 /* 詳細・削除ボタンのスタイル */
 .btn-inline {
     display: inline-block;
     margin-right: 10px;
+    color: blue;
 }
 
 /* 新規登録ボタンのスタイル */
 .btn-primary {
     margin-bottom: 15px;
+    margin-top: 10px;
+}
+
+/* ボタン全体のスタイル */
+.btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+    margin: bottom 30px;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+/* ボタン内アイコンのスタイル */
+.btn-info i {
+    margin-right: 5px;
+}
+
+/* ボタン内テキストのスタイル */
+.btn-info span {
+    font-size: 14px;
 }
