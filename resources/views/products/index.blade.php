@@ -26,6 +26,7 @@
                 <tr>
                     <th>ID</th>
                     <th>商品画像</th>
+                    <th>商品名</th>
                     <th>価格</th>
                     <th>在庫数</th>
                     <th>メーカー名</th>
@@ -47,6 +48,7 @@
                                 画像なし
                             @endif
                         </td>
+                        <td>{{ $product->product_name}}</td>
                         <td>{{ $product->price }}</td>
                         <td>{{ $product->stock }}</td>
                         <td>{{ $product->company->company_name }}</td>

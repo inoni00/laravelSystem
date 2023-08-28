@@ -2,19 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Http\Requests\ProductRequest as RequestsProductRequest;
 use App\Models\Company;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\Request\ProductRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $products = Product::with('company')->paginate(10);
+        $query = Product::with('company'); // Eager loading
+
+    // 検索キーワードがあれば商品名で絞り込み
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('product_name', 'like', "%$search%");
+        }
+
+    // メーカーが選択されていればメーカーで絞り込み
+        if ($request->has('company')) {
+            $company = $request->input('company');
+            $query->where('company_id', $company);
+        }
+
+        $products = $query->paginate(10);
 
         return view('products.index', compact('products'));
     }
+
 
     public function create()
     {
@@ -23,36 +42,24 @@ class ProductController extends Controller
         return view('products.create', compact('companies'));
     }
 
-    public function store(Request $request)
+    public function store(RequestsProductRequest $request)
     {
-        $request->validate([
-            'company_name' => 'required', // メーカー名をバリデーションに追加
-            'product_name' => 'required',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'comment' => 'nullable',
-            'img_path' => 'nullable|image|max:2048',
-        ]);
-    
-        $imagePath = null;
-        if ($request->hasFile('img_path')) {
-            $image = $request->file('img_path');
-            $imagePath = $image->store('public/images');
+        DB::beginTransaction();
+        
+        try{
+            
+        
+            // 登録処理呼び出し
+            $model = new Product();
+            $model->storeProduct($request);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back();
+
         }
     
-        // メーカー名をデータベースに保存するか、既存のメーカー名を取得する
-        $company = Company::firstOrCreate(['company_name' => $request->input('company_name')]);
-    
-        $product = Product::create([
-            'company_id' => $company->id, // メーカーIDを保存
-            'product_name' => $request->input('product_name'),
-            'price' => $request->input('price'),
-            'stock' => $request->input('stock'),
-            'comment' => $request->input('comment'),
-            'img_path' => $imagePath,
-        ]);
-    
-        return redirect()->route('products.show', $product)
+        return redirect()->route('products.show',$model)
             ->with('success', '商品が登録されました。');
     }
 
@@ -70,15 +77,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $request->validate([
-            'company_id' => 'required|exists:companies,id',
-            'product_name' => 'required',
-            'price' => 'required|numeric|min:0.01',
-            'stock' => 'required|integer|min:0',
-            'comment' => 'nullable',
-            'img_path' => 'nullable|image|max:2048',
-        ]);
-
+        
         $imagePath = $product->img_path;
 
         if ($request->hasFile('img_path')) {
