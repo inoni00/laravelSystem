@@ -6,9 +6,9 @@ use App\Http\Requests\ProductRequest as RequestsProductRequest;
 use App\Models\Company;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Http\Request\ProductRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+
 
 
 class ProductController extends Controller
@@ -45,22 +45,38 @@ class ProductController extends Controller
     public function store(RequestsProductRequest $request)
     {
         DB::beginTransaction();
-        
+
         try{
+            
+            
+            $data = $request->all();
+            
+            
+
             
         
             // 登録処理呼び出し
             $model = new Product();
             $model->storeProduct($request);
+            if($request->hasFile('img_path')){
+                $image = $request->file('img_path');
+                $name = $image->getClientOriginalName();
+                $image->move('storage/',$name);
+                $data['img_path'] = $name;
+            }else{
+                $data['img_path'] = null;
+            }
             DB::commit();
+
+            return redirect()->route('products.show',['product' => $model->id])
+            ->with('success', '商品が登録されました。');
         } catch (\Exception $e) {
             DB::rollback();
             return back();
 
         }
     
-        return redirect()->route('products.show',$model)
-            ->with('success', '商品が登録されました。');
+        
     }
 
     public function show(Product $product)
@@ -77,38 +93,55 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        
-        $imagePath = $product->img_path;
+        DB::beginTransaction();
 
-        if ($request->hasFile('img_path')) {
-            $image = $request->file('img_path');
-            Storage::delete($imagePath);
-            $imagePath = $image->store('public/images');
+        try{
+
+            $imagePath = $product->img_path;
+
+            if ($request->hasFile('img_path')) {
+                $image = $request->file('img_path');
+                Storage::delete($imagePath);
+                $imagePath = $image->store('public/images');
+            }
+
+            $product->updateProduct($request);
+            
+            DB::commit();
+
+            return redirect()->route('products.show', ['product' => $product])
+                ->with('success', '商品情報が更新されました。');
+
+            }catch(\Exception $e) {
+                DB::rollback();
+                return back();
+    
         }
 
-        $product->update([
-            'company_id' => $request->input('company_id'),
-            'product_name' => $request->input('product_name'),
-            'price' => $request->input('price'),
-            'stock' => $request->input('stock'),
-            'comment' => $request->input('comment'),
-            'img_path' => $imagePath,
-        ]);
-
-        return redirect()->route('products.show', $product)
-            ->with('success', '商品情報が更新されました。');
     }
 
     public function destroy(Product $product)
     {
-        if ($product->img_path) {
-            Storage::delete($product->img_path);
-        }
-        
-        $product->delete();
-    
-        return redirect()->route('products.index')
-            ->with('success', '商品が削除されました。');
+
+        DB::beginTransaction();
+
+            try{
+
+                if ($product->img_path) {
+                        Storage::delete($product->img_path);
+                }
+                    
+                    $product->delete();
+
+                    DB::commit();
+                
+                    return redirect()->route('products.index')
+                        ->with('success', '商品が削除されました。');
+                }catch(\Exception $e){
+                    DB::rollback();
+                        return back();
+            }
+            
     }
     
 }

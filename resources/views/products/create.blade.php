@@ -16,13 +16,13 @@
                     @endforeach
 
                 </select>
-                @error('company_name') 
+                @error('company_id') 
                     <span class="text-danger">{{ $message }}</span> 
                 @enderror
             </div>
 
             <!-- 隠しフィールド company_id 用の input を追加 -->
-            <input type="hidden" name="company_id" id="company_id_hidden" value="{{ old('company_id') ?? '' }}">
+            <input type="hidden" name="company_id_hidden" id="company_id_hidden" value="{{ old('company_id') ?? '' }}">
 
             <div class="form-group">
                 <label for="product_name">商品名</label>
@@ -64,38 +64,12 @@
                 @enderror
             </div>
 
-            <button type="submit" class="btn btn-primary">登録</button>
+            <button type="submit" class="btn btn-primary"onclick="return confirm('本当に登録しますか？')">登録</button>
             <a href="{{ route('products.index') }}" class="btn btn-secondary">戻る</a>
         </form>
     </div>
     
-    <script>
-    document.getElementById('company_id').addEventListener('change', function() {
-        var selectedCompany = this.value; // 選択されたメーカー名の値を取得
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '{{ route('getCompanyId') }}', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                var companyId = JSON.parse(xhr.responseText).company_id;
-                document.getElementById('company_id_hidden').value = companyId;
-            }
-        };
-
-        // CSRFトークンをHTMLのdata属性から取得
-        var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // リクエストデータをオブジェクトとして準備
-        var requestData = {
-            company_name: selectedCompany,
-            _token: csrfToken
-        };
-
-        // JSON形式にエンコードしてリクエスト送信
-        xhr.send(JSON.stringify(requestData));
-    });
-    </script>
+    
 
     
 @endsection
