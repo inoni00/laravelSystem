@@ -64,7 +64,7 @@
             @if ($product->img_path)
                 <div class="form-group">
                     <label>現在の商品画像</label>
-                    <img src="{{ Storage::url($product->img_path) }}" alt="現在の商品画像" style="max-width: 200px;">
+                    <img src="{{ asset($product->img_path) }}" alt="現在の商品画像" style="max-width: 200px;">
                 </div>
             @endif
 

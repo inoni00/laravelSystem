@@ -51,21 +51,34 @@ class ProductController extends Controller
             
             $data = $request->all();
             
-            
-
-            
         
             // 登録処理呼び出し
             $model = new Product();
             $model->storeProduct($request);
-            if($request->hasFile('img_path')){
+            $imagePath = null; 
+            if ($request->hasFile('img_path')) { 
                 $image = $request->file('img_path');
-                $name = $image->getClientOriginalName();
-                $image->move('storage/',$name);
-                $data['img_path'] = $name;
-            }else{
-                $data['img_path'] = null;
-            }
+                //アップロードされた画像のファイル名を取得 
+                $filename = $image->getClientOriginalName();
+                //取得したファイル名でimagesフォルダに保存（store→storeAs) 
+                $image->storeAs('public/images', $filename); 
+            }else{ $imagePath =""; }
+                    //念の為、画像がアップロードされていないときの処理を追加 
+                
+                    
+            // メーカー名をデータベースに保存するか、既存のメーカー名を取得する 
+            $company = Company::firstOrCreate(['company_name' => $request->input('company_name')]); 
+            $product = Product::create([ 
+                'company_id' => $company->id, 
+                // メーカーIDを保存 
+                'product_name' => $request->input('product_name'), 
+                'price' => $request->input('price'), 
+                'stock' => $request->input('stock'), 
+                'comment' => $request->input('comment'),
+                //viewでasset関数を使うため、それに合わせて保存名を設定 
+                'img_path' => 'storage/images/'. $filename, 
+                ]);
+                
             DB::commit();
 
             return redirect()->route('products.show',['product' => $model->id])
@@ -102,7 +115,8 @@ class ProductController extends Controller
             if ($request->hasFile('img_path')) {
                 $image = $request->file('img_path');
                 Storage::delete($imagePath);
-                $imagePath = $image->store('public/images');
+                $filename = $image->getClientOriginalName();
+                $imagePath = $image->storeAs('public/images',$filename);
             }
 
             $product->updateProduct($request);

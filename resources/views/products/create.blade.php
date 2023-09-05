@@ -3,7 +3,15 @@
 @section('content')
     <div class="container">
         <h1>商品新規登録</h1>
-
+        @if ($errors->any())
+                <div class="alert alert-danger">
+                <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+                </ul>
+            </div>
+        @endif
         <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
             @csrf
 
@@ -63,6 +71,8 @@
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
+
+                
 
             <button type="submit" class="btn btn-primary"onclick="return confirm('本当に登録しますか？')">登録</button>
             <a href="{{ route('products.index') }}" class="btn btn-secondary">戻る</a>
