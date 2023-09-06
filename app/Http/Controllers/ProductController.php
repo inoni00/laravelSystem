@@ -53,21 +53,21 @@ class ProductController extends Controller
             
         
             // 登録処理呼び出し
-            $model = new Product();
-            $model->storeProduct($request);
+            $product = new Product();
+            
             $imagePath = null; 
             if ($request->hasFile('img_path')) { 
                 $image = $request->file('img_path');
                 //アップロードされた画像のファイル名を取得 
                 $filename = $image->getClientOriginalName();
                 //取得したファイル名でimagesフォルダに保存（store→storeAs) 
-                $image->storeAs('public/images', $filename); 
-            }else{ $imagePath =""; }
+                $imagePath = 'storage/images/' . $filename; 
+            }
                     //念の為、画像がアップロードされていないときの処理を追加 
                 
                     
             // メーカー名をデータベースに保存するか、既存のメーカー名を取得する 
-            $company = Company::firstOrCreate(['company_name' => $request->input('company_name')]); 
+            $company = Company::firstOrCreate(['company_name' => $request->input('company_id')]);            
             $product = Product::create([ 
                 'company_id' => $company->id, 
                 // メーカーIDを保存 
@@ -76,12 +76,12 @@ class ProductController extends Controller
                 'stock' => $request->input('stock'), 
                 'comment' => $request->input('comment'),
                 //viewでasset関数を使うため、それに合わせて保存名を設定 
-                'img_path' => 'storage/images/'. $filename, 
+                'img_path' => $imagePath, 
                 ]);
                 
             DB::commit();
 
-            return redirect()->route('products.show',['product' => $model->id])
+            return redirect()->route('products.show',['product' => $product->id])
             ->with('success', '商品が登録されました。');
         } catch (\Exception $e) {
             DB::rollback();
