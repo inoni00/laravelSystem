@@ -6,7 +6,6 @@
     <title>自動販売機管理システム</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous"></head>
     
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
     <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
