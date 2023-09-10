@@ -3,6 +3,12 @@
 @section('content')
     <div class="container">
         <h1>商品新規登録</h1>
+        @if (session('success'))
+            <div class="alert alert-success text-center">
+                {{ session('success') }}
+            </div> 
+        @endif
+
         @if ($errors->any())
                 <div class="alert alert-danger">
                 <ul>

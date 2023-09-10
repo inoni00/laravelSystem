@@ -3,7 +3,13 @@
 @section('content')
     <div class="container">
         <h1>商品編集</h1>
-
+        
+        @if (session('success'))
+            <div class="alert alert-success text-center">
+                {{ session('success') }}
+            </div> 
+        @endif
+        
         <form method="POST" action="{{ route('products.update', $product) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')

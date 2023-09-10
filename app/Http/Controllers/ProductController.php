@@ -67,9 +67,9 @@ class ProductController extends Controller
                 
                     
             // メーカー名をデータベースに保存するか、既存のメーカー名を取得する 
-            $company = Company::firstOrCreate(['company_name' => $request->input('company_id')]);            
+                      
             $product = Product::create([ 
-                'company_id' => $company->id, 
+                'company_id' => $request->input('company_id'), 
                 // メーカーIDを保存 
                 'product_name' => $request->input('product_name'), 
                 'price' => $request->input('price'), 
@@ -81,7 +81,7 @@ class ProductController extends Controller
                 
             DB::commit();
 
-            return redirect()->route('products.show',['product' => $product->id])
+            return redirect()->route('products.create',['product' => $product->id])
             ->with('success', '商品が登録されました。');
         } catch (\Exception $e) {
             DB::rollback();
@@ -123,7 +123,7 @@ class ProductController extends Controller
             
             DB::commit();
 
-            return redirect()->route('products.show', ['product' => $product])
+            return redirect()->route('products.edit', ['product' => $product])
                 ->with('success', '商品情報が更新されました。');
 
             }catch(\Exception $e) {

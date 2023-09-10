@@ -34,7 +34,7 @@
                     <th>商品画像</th>
                     <td>
                         @if ($product->img_path)
-                            <img src="{{ Storage::url($product->img_path) }}" alt="商品画像" style="max-width: 200px;">
+                            <img src="{{ asset($product->img_path) }}" alt="商品画像" style="max-width: 200px;">
                         @else
                             画像なし
                         @endif
