@@ -51,7 +51,7 @@ class Product extends Model
      */
     // Product.php
 
-    public function updateProduct($data)
+    public function updateProduct($data,$imagePath)
     {
         // 商品情報を更新
         $this->company_id = $data->company_id;
@@ -59,7 +59,7 @@ class Product extends Model
         $this->price = $data->price;
         $this->stock = $data->stock;
         $this->comment = $data->comment;
-        $this->img_path = $data->img_path;
+        $this->img_path = $imagePath;
 
         $this->save(); // モデルを保存
     }

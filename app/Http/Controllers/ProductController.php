@@ -60,11 +60,13 @@ class ProductController extends Controller
                 $image = $request->file('img_path');
                 //アップロードされた画像のファイル名を取得 
                 $filename = $image->getClientOriginalName();
-                //取得したファイル名でimagesフォルダに保存（store→storeAs) 
-                $imagePath = 'storage/images/' . $filename; 
+
+                $imagePath = $image->storeAs('public/images', $filename); 
+            }else{
+                $imagePath = "";
             }
                     //念の為、画像がアップロードされていないときの処理を追加 
-                
+        
                     
             // メーカー名をデータベースに保存するか、既存のメーカー名を取得する 
                       
@@ -76,7 +78,7 @@ class ProductController extends Controller
                 'stock' => $request->input('stock'), 
                 'comment' => $request->input('comment'),
                 //viewでasset関数を使うため、それに合わせて保存名を設定 
-                'img_path' => $imagePath, 
+                'img_path' => 'storage/images/'.$filename, 
                 ]);
                 
             DB::commit();
@@ -111,7 +113,6 @@ class ProductController extends Controller
         try{
 
             $imagePath = $product->img_path;
-
             if ($request->hasFile('img_path')) {
                 $image = $request->file('img_path');
                 Storage::delete($imagePath);
@@ -119,7 +120,7 @@ class ProductController extends Controller
                 $imagePath = $image->storeAs('public/images',$filename);
             }
 
-            $product->updateProduct($request);
+            $product->updateProduct($request,$imagePath);
             
             DB::commit();
 
