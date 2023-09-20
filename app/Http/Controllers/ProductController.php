@@ -57,30 +57,29 @@ class ProductController extends Controller
             
             $imagePath = null; 
             if ($request->hasFile('img_path')) { 
-                $image = $request->file('img_path');
-                //アップロードされた画像のファイル名を取得 
-                $filename = $image->getClientOriginalName();
+                $image = $request->file('img_path'); 
+                $filename = $image->getClientOriginalName(); 
+                //まず、だけを単品で行い、
+                $image->storeAs('public/images',$filename);
+                 
+                //続いて、
+                $imagePath ='storage/images/'.$filename;
+                //のようにDBに保存する値を設定する。 
+                 
+            }else{ 
+                $imagePath = ""; 
+            } 
 
-                $imagePath = $image->storeAs('public/images', $filename); 
-            }else{
-                $imagePath = "";
-            }
-                    //念の為、画像がアップロードされていないときの処理を追加 
-        
+            $product = Product::create([
+                 'company_id' => $request->input('company_id'),
+                 'product_name' => $request->input('product_name'),
+                 'price' => $request->input('price'), 
+                 'stock' => $request->input('stock'), 
+                 'comment' => $request->input('comment'),
+                    //if文内で$imagePathの設定をしたので、ここは$imagePathだけ渡す 
+                 'img_path' => $imagePath, 
+                ]); 
                     
-            // メーカー名をデータベースに保存するか、既存のメーカー名を取得する 
-                      
-            $product = Product::create([ 
-                'company_id' => $request->input('company_id'), 
-                // メーカーIDを保存 
-                'product_name' => $request->input('product_name'), 
-                'price' => $request->input('price'), 
-                'stock' => $request->input('stock'), 
-                'comment' => $request->input('comment'),
-                //viewでasset関数を使うため、それに合わせて保存名を設定 
-                'img_path' => 'storage/images/'.$filename, 
-                ]);
-                
             DB::commit();
 
             return redirect()->route('products.create',['product' => $product->id])
@@ -112,13 +111,29 @@ class ProductController extends Controller
 
         try{
 
-            $imagePath = $product->img_path;
+            // $imagePath = $product->img_path;
+            // if ($request->hasFile('img_path')) {
+            //     $image = $request->file('img_path');
+            //     Storage::delete($imagePath);
+            //     $filename = $image->getClientOriginalName();
+            //     $imagePath = $image->storeAs('public/images',$filename);
+            // }
+
+            $imagePath = $product->img_path; 
             if ($request->hasFile('img_path')) {
-                $image = $request->file('img_path');
-                Storage::delete($imagePath);
-                $filename = $image->getClientOriginalName();
-                $imagePath = $image->storeAs('public/images',$filename);
-            }
+                $image = $request->file('img_path'); 
+                //Storage::deleteはpublic/images/ファイル名と指定をするべきだが、 
+                //storage/images/ファイル名でDBには保存されてしまっているので、 
+                //substrやmb_substrを使用したりして加工してあげる必要がある。
+                 Storage::delete(substr($imagePath,0,80)); 
+                 $filename = $image->getClientOriginalName(); 
+                 //まず、だけを単品で行い、
+                 $image->storeAs('public/images',$filename);
+                 //続いて、のようにDBに保存する値を設定する。
+                 $imagePath ='storage/images/'.$filename;
+                  
+                  
+                }
 
             $product->updateProduct($request,$imagePath);
             
