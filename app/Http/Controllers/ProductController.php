@@ -31,6 +31,12 @@ class ProductController extends Controller
 
         $products = $query->paginate(10);
 
+        if ($request->ajax()) {
+            // 非同期リクエストの場合、商品一覧のビューを返す
+            return view('products.index', compact('products'));
+        }
+    
+        // 通常のリクエストの場合、商品一覧ページを表示
         return view('products.index', compact('products'));
     }
 
