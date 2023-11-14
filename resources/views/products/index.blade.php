@@ -10,19 +10,21 @@
         <h1>商品一覧画面</h1>
 
         <div class="mb-3">
-            <form method="GET" id="search-form" class="form-inline">
+            <form method="GET" id="search-form" class="form-inline" action="{{ route('products.index') }}" >
+                @csrf
+
                 <div class="form-group mr-2">
-                    <input type="text" name="search" class="form-control" placeholder="検索キーワード">
+                    <input type="text" name="search" class="form-control" placeholder="検索キーワード" id="searchInput">
                 </div>
                 <div class="form-group mr-2">
-                    <select name="company" class="form-control">
+                    <select name="company" class="form-control" id="companySelect">
                         <option value="">メーカー名</option>
                         @foreach (\App\Models\Company::all() as $company)
                             <option value="{{ $company->id }}">{{ $company->company_name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <button type="button" id="search-button" class="btn btn-primary">検索</button>
+                <button type="button" id="searchButton" class="btn btn-primary">検索</button>
             </form>
         </div>
 
@@ -81,31 +83,40 @@
 
         {{ $products->links() }}
 
-        <div id="products-list"></div> <!-- 検索結果を表示するための要素 -->
+    </div>
+
+        <div id="searchResults"></div>
 
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
         <script>
             $(function() {
                 // 検索フォームの送信をキャッチ
-                $('#search-form').button(function(e) {
+                $('#searchButton').on('click',function(e) {
+                    
                     e.preventDefault();
 
                     // 検索キーワードを取得
-                    var search = $('#search').val();
+                    var searchQuery = $('#searchInput').val();
+                    var companyQuery = $('#companySelect').val();
 
                     // 非同期リクエストを送信
                     $.ajax({
-                        url: '/products', // 商品一覧を返すルートに合わせて変更
+                        url: '{{ route('products.search') }}', // 商品一覧を返すルートに合わせて変更
                         type: 'GET',
-                        data: { search: search },
-                        success: function(response) {
-                            // 商品一覧を更新
-                            $('#product-list').html(response);
+                        data: {
+                            search: searchQuery,
+                            company: companyQuery
+                        },
+                        success: function(response){
+                            $('#searchResults').html(response);
+                        },
+                        error: function(error){
+                            console.error('AJAXエラー:', error);
                         }
                     });
-                });
             });
+        })
         </script>
         
-    </div>
+    
 @endsection

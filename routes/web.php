@@ -36,7 +36,13 @@ Route::group(['middleware' => 'auth'],function(){
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
 
     Route::get('/products', [ProductController::class,'index'])->name('products.index');
-// routes/web.php
+    
+    // Route::get('/products', [ProductController::class,'search'])->name('products.search');
+
+    
+
+    Route::get('/products/search', [ProductController::class,'search'])->name('products.search');
+
 
     Route::post('/getCompanyId', 'ProductController@getCompanyId')->name('getCompanyId');
 });
