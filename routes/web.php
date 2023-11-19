@@ -41,10 +41,10 @@ Route::group(['middleware' => 'auth'],function(){
 
     
 
-    Route::get('/products/search', [ProductController::class,'search'])->name('products.search');
+    // Route::get('/products/search', [ProductController::class,'index'])->name('products.search');
 
 
-    Route::post('/getCompanyId', 'ProductController@getCompanyId')->name('getCompanyId');
+    // Route::post('/getCompanyId', 'ProductController@getCompanyId')->name('getCompanyId');
 });
 
 

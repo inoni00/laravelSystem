@@ -28,7 +28,7 @@
             </form>
         </div>
 
-       
+        <div id="searchResults"></div>
 
         @if (session('success'))
             <div class="alert alert-success text-center">
@@ -81,14 +81,14 @@
             </tbody>
         </table>
 
-        {{ $products->links() }}
+        {{ $products->links('pagination::default') }}
 
     </div>
 
-        <div id="searchResults"></div>
+        
 
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-        <script>
+        <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>        -->
+          <script>
             $(function() {
                 // 検索フォームの送信をキャッチ
                 $('#searchButton').on('click',function(e) {
@@ -101,7 +101,7 @@
 
                     // 非同期リクエストを送信
                     $.ajax({
-                        url: '{{ route('products.search') }}', // 商品一覧を返すルートに合わせて変更
+                        url: '/products', // 商品一覧を返すルートに合わせて変更
                         type: 'GET',
                         data: {
                             search: searchQuery,

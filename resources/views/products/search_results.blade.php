@@ -41,4 +41,4 @@
     </tbody>
 </table>
 
-{{ $products->links() }}
+{{ $products->links('pagination::default') }}

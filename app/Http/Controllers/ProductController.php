@@ -16,10 +16,27 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::with('company'); // Eager loading
-        $products = $query->paginate(10);
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('product_name', 'like', "%$search%");
+        }
     
+        if ($request->has('company')) {
+            $company = $request->input('company');
+            $query->where('company_id', $company);
+        }
+    
+        $products = $query->paginate(10);
+
         // 通常のリクエストの場合、商品一覧ページを表示
         return view('products.index', compact('products'));
+    
+        if ($request->ajax()) {
+            //非同期リクエストの場合、検索結果のビューを返す
+            return view('/products/search_results', compact('products'));
+        }
+        
+        
     }
 
 
@@ -55,24 +72,24 @@ class ProductController extends Controller
 
     // app/Http/Controllers/ProductController.php
 
-public function search(Request $request)
-{
-    $query = Product::with('company');
+// public function search(Request $request)
+// {
+//     $query = Product::with('company');
 
-    if ($request->has('search')) {
-        $search = $request->input('search');
-        $query->where('product_name', 'like', "%$search%");
-    }
+//     if ($request->has('search')) {
+//         $search = $request->input('search');
+//         $query->where('product_name', 'like', "%$search%");
+//     }
 
-    if ($request->has('company')) {
-        $company = $request->input('company');
-        $query->where('company_id', $company);
-    }
+//     if ($request->has('company')) {
+//         $company = $request->input('company');
+//         $query->where('company_id', $company);
+//     }
 
-    $products = $query->paginate(10);
+//     $products = $query->paginate(10);
 
-    return view('products.search_results', compact('products'))->render();
-}
+//     return view('products.search_results', compact('products'))->render();
+// }
 
 
     public function create()

@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>自動販売機管理システム</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>    
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
     
 
@@ -42,14 +45,34 @@
 
     @yield('content')
     
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script>
-        $(function(){
-            
-        });
-    </script>
+    <!-- <script>
+            $(function() {
+                // 検索フォームの送信をキャッチ
+                $('#searchButton').on('click',function(e) {
+                    
+                    e.preventDefault();
 
+                    // 検索キーワードを取得
+                    var searchQuery = $('#searchInput').val();
+                    var companyQuery = $('#companySelect').val();
+
+                    // 非同期リクエストを送信
+                    $.ajax({
+                        url: '/products', // 商品一覧を返すルートに合わせて変更
+                        type: 'GET',
+                        data: {
+                            search: searchQuery,
+                            company: companyQuery
+                        },
+                        success: function(response){
+                            $('#searchResults').html(response);
+                        },
+                        error: function(error){
+                            console.error('AJAXエラー:', error);
+                        }
+                    });
+            });
+        })
+        </script> -->
 </body>
 </html>
