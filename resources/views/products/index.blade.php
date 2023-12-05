@@ -14,9 +14,12 @@
                 @csrf
 
                 <div class="form-group mr-2">
-                    <input type="text" name="search" class="form-control" placeholder="検索キーワード" id="searchInput">
+                <lavel for="search">商品名:</lavel>
+                    <input type="text" name="search" class="form-control" placeholder="商品名" id="searchInput">
                 </div>
+                
                 <div class="form-group mr-2">
+                    <lavel for="company">メーカー名:</lavel>
                     <select name="company" class="form-control" id="companySelect">
                         <option value="">メーカー名</option>
                         @foreach (\App\Models\Company::all() as $company)
@@ -24,7 +27,33 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="button" id="searchButton" class="btn btn-primary">検索</button>
+                
+                <div class="form-group mr-2">
+                    <label for="minPrice">最低価格:</label>
+                    <input type="number" name="minPrice" class="form-control" placeholder="最低価格" id="minPrice">
+                </div>
+
+                <div class="form-group mr-2">
+                    <label for="maxPrice">最高価格:</label>
+                    <input type="number" name="maxPrice" class="form-control" placeholder="最高価格" id="maxPrice">
+                </div>
+
+                <div class="form-group mr-2">
+                    <label for="minStock">最低在庫数:</label>
+                    <input type="number" name="minStock" class="form-control" placeholder="最低在庫数" id="minStock">
+                </div>
+
+                <div class="form-group mr-2">
+                    <label for="maxStock">最高在庫数:</label>
+                    <input type="number" name="maxStock" class="form-control" placeholder="最高在庫数" id="maxStock">
+                </div>
+                
+                <!-- <div class="form-group mr-2">
+                    <input type="text" name="search" class="form-control" placeholder="商品名" id="searchInput">
+                </div> -->
+
+            
+                <button type="submit" id="searchButton" class="btn btn-primary">検索</button>
             </form>
         </div>
 
@@ -36,7 +65,7 @@
             </div> 
         @endif
 
-        <table class="table">
+        <table  id="fav-table" class="tablesorter">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -70,7 +99,7 @@
                         <td>
                             <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-info">詳細</a>
                             
-                            <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline">
+                            <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline"id="delete-product">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('本当に削除しますか？')">削除</button>
@@ -90,31 +119,82 @@
         <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>        -->
           <script>
             $(function() {
+
+                $(".tablesorter").tablesorter({
+                    theme: 'bootstrap', // テーマをBootstrapに設定
+                    widgets: ['zebra', 'filter'], // 任意のウィジェットを設定
+                    header:{
+                        6: { sorter: false }
+                    },
+                    sortList:[0,1],
+                });
+
+
+                $('#delete-product').on('click', function () {
+                    var productId = $(this).data('product-id');
+
+                    // 非同期で削除リクエストを送信
+                    $.ajax({
+                        url: '/products/' + productId,
+                        type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                // 削除成功時、該当行を非表示にする
+                                $('#product_' + productId).hide();
+                                alert(response.message); // 任意: 削除成功メッセージ
+                            } else {
+                                alert('Failed to delete product');
+                            }
+                        },
+                        error: function () {
+                            alert('Error deleting product');
+                        }
+                    });
+                });
+
                 // 検索フォームの送信をキャッチ
                 $('#searchButton').on('click',function(e) {
                     
                     e.preventDefault();
+                    // loadProducts();
 
+                    
+                    
                     // 検索キーワードを取得
-                    var searchQuery = $('#searchInput').val();
-                    var companyQuery = $('#companySelect').val();
+                    // function loadProducts(){
+                        var searchQuery = $('#searchInput').val();
+                        var companyQuery = $('#companySelect').val();
+                        var minPrice = $('#minPrice').val();
+                        var maxPrice = $('#maxPrice').val();
+                        var minStock = $('#minStock').val();
+                        var maxStock = $('#maxStock').val();
+                    
 
                     // 非同期リクエストを送信
-                    $.ajax({
-                        url: '/products', // 商品一覧を返すルートに合わせて変更
-                        type: 'GET',
-                        data: {
-                            search: searchQuery,
-                            company: companyQuery
-                        },
-                        success: function(response){
-                            $('#searchResults').html(response);
-                        },
-                        error: function(error){
-                            console.error('AJAXエラー:', error);
-                        }
-                    });
+                        $.ajax({
+                            url: '/products', // 商品一覧を返すルートに合わせて変更
+                            type: 'GET',
+                            data: {
+                                search: searchQuery,
+                                company: companyQuery,
+                                minPrice: minPrice,
+                                maxPrice: maxPrice,
+                                minStock: minStock,
+                                maxStock: maxStock
+                            },
+                            success: function(response){
+                                var tableData = $(response).find('.table').html();
+                                $('#searchResults').html(tableData);                        },
+                            error: function(error){
+                                console.error('AJAXエラー:', error);
+                            }
+                        });
+                    // }
             });
+            
         })
         </script>
         

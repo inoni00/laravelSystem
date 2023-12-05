@@ -8,6 +8,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 
 
 
@@ -25,6 +26,27 @@ class ProductController extends Controller
             $company = $request->input('company');
             $query->where('company_id', $company);
         }
+
+        if ($request->filled('minPrice')) {
+            $minPrice = $request->input('minPrice');
+            $query->where('price', '>=', $minPrice);
+        }
+    
+        if ($request->filled('maxPrice')) {
+            $maxPrice = $request->input('maxPrice');
+            $query->where('price', '<=', $maxPrice);
+        }
+    
+        // 在庫数の範囲検索
+        if ($request->filled('minStock')) {
+            $minStock = $request->input('minStock');
+            $query->where('stock', '>=', $minStock);
+        }
+    
+        if ($request->filled('maxStock')) {
+            $maxStock = $request->input('maxStock');
+            $query->where('stock', '<=', $maxStock);
+        }
     
         $products = $query->paginate(10);
 
@@ -40,56 +62,56 @@ class ProductController extends Controller
     }
 
 
-// ProductController.php
-    // public function search(Request $request)
-    // {
-    //     // 検索ロジックを実行
-    //     // $results = ...;
-    //     $query = Product::with('company'); // Eager loading
+        // ProductController.php
+            // public function search(Request $request)
+            // {
+            //     // 検索ロジックを実行
+            //     // $results = ...;
+            //     $query = Product::with('company'); // Eager loading
 
-    // // 検索キーワードがあれば商品名で絞り込み
-    //     if ($request->has('search')) {
-    //         $search = $request->input('search');
-    //         $query->where('product_name', 'like', "%$search%");
-    //     }
+            // // 検索キーワードがあれば商品名で絞り込み
+            //     if ($request->has('search')) {
+            //         $search = $request->input('search');
+            //         $query->where('product_name', 'like', "%$search%");
+            //     }
 
-    // // メーカーが選択されていればメーカーで絞り込み
-    //     if ($request->has('company')) {
-    //         $company = $request->input('company');
-    //         $query->where('company_id', $company);
-    //     }
+            // // メーカーが選択されていればメーカーで絞り込み
+            //     if ($request->has('company')) {
+            //         $company = $request->input('company');
+            //         $query->where('company_id', $company);
+            //     }
 
-    //     $products = $query->paginate(10);
+            //     $products = $query->paginate(10);
 
-        
-    //     if ($request->ajax()) {
-    //         // 非同期リクエストの場合、検索結果のビューを返す
-    //         return view('products.search_results');
-    //     }
+                
+            //     if ($request->ajax()) {
+            //         // 非同期リクエストの場合、検索結果のビューを返す
+            //         return view('products.search_results');
+            //     }
 
-        
-    // }
+                
+            // }
 
-    // app/Http/Controllers/ProductController.php
+            // app/Http/Controllers/ProductController.php
 
-// public function search(Request $request)
-// {
-//     $query = Product::with('company');
+        // public function search(Request $request)
+        // {
+        //     $query = Product::with('company');
 
-//     if ($request->has('search')) {
-//         $search = $request->input('search');
-//         $query->where('product_name', 'like', "%$search%");
-//     }
+        //     if ($request->has('search')) {
+        //         $search = $request->input('search');
+        //         $query->where('product_name', 'like', "%$search%");
+        //     }
 
-//     if ($request->has('company')) {
-//         $company = $request->input('company');
-//         $query->where('company_id', $company);
-//     }
+        //     if ($request->has('company')) {
+        //         $company = $request->input('company');
+        //         $query->where('company_id', $company);
+        //     }
 
-//     $products = $query->paginate(10);
+        //     $products = $query->paginate(10);
 
-//     return view('products.search_results', compact('products'))->render();
-// }
+        //     return view('products.search_results', compact('products'))->render();
+        // }
 
 
     public function create()
@@ -207,28 +229,33 @@ class ProductController extends Controller
 
     }
 
-    public function destroy(Product $product)
+    public function destroy(Request $request, Product $product)
     {
-
         DB::beginTransaction();
 
-            try{
-
-                if ($product->img_path) {
-                        Storage::delete($product->img_path);
-                }
-                    
-                    $product->delete();
-
-                    DB::commit();
-                
-                    return redirect()->route('products.index')
-                        ->with('success', '商品が削除されました。');
-                }catch(\Exception $e){
-                    DB::rollback();
-                        return back();
+        try {
+            if ($product->img_path) {
+                Storage::delete($product->img_path);
             }
+
+            $product->delete();
+
+            DB::commit();
+
+            if ($request->ajax()) {
+                return Response::json(['status' => 'success', 'message' => 'Product deleted successfully']);
+            }
+
+            return redirect()->route('products.index')->with('success', 'Product deleted successfully');
+        } catch (\Exception $e) {
+            DB::rollback();
             
+            if ($request->ajax()) {
+                return Response::json(['status' => 'error', 'message' => 'Failed to delete product']);
+            }
+
+            return back()->with('error', 'Failed to delete product');
+        }
     }
     
 }
