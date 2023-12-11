@@ -102,7 +102,8 @@
                             <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline"id="delete-product">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('本当に削除しますか？')">削除</button>
+                                
+                                <button type="button" class="btn btn-sm btn-danger delete-product"  data-product-id="{{ $product->id}}">削除</button>
                             </form>
                         </td>
                     </tr>
@@ -118,6 +119,13 @@
 
         <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>        -->
           <script>
+
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
             $(function() {
 
                 $(".tablesorter").tablesorter({
@@ -130,30 +138,39 @@
                 });
 
 
-                $('#delete-product').on('click', function () {
-                    var productId = $(this).data('product-id');
+                $('.delete-product').on('click', function () {
+                    var deleteConfirm = confirm('削除してよろしいでしょうか？');
 
-                    // 非同期で削除リクエストを送信
-                    $.ajax({
-                        url: '/products/' + productId,
-                        type: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function (response) {
-                            if (response.status === 'success') {
-                                // 削除成功時、該当行を非表示にする
-                                $('#product_' + productId).hide();
-                                alert(response.message); // 任意: 削除成功メッセージ
-                            } else {
-                                alert('Failed to delete product');
+                    if(deleteConfirm == true){
+                        var clickEle = $(this)
+                        var productId = clickEle.attr('data-product-id');
+                        
+
+                        // 非同期で削除リクエストを送信
+                        $.ajax({
+                            url: '/products/' + productId,
+                            type: 'POST',
+                            data:{
+                                'id':productId,
+                                '_method': 'DELETE'
+                                },
+                            // headers: {
+                            //     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            // },
+                            success: function (response) {
+                                if (response.status === 'success') {
+                                    // 削除成功時、該当行を非表示にする
+                                    clickEle.parents('tr').remove();
+                                    alert(response.message); 
+                                } else {
+                                    alert('Failed to delete product');
+                                }
+                            },
+                            error: function () {
+                                alert('エラー');
                             }
-                        },
-                        error: function () {
-                            alert('Error deleting product');
-                        }
-                    });
-                });
+                        });
+                }});
 
                 // 検索フォームの送信をキャッチ
                 $('#searchButton').on('click',function(e) {

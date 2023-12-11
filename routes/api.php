@@ -2,6 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SalesController; 
+
+Route::group(['middleware' => 'auth'],function(){
+    Route::post('/purchase', 'SalesController@purchase'); 
+});
 
 /*
 |--------------------------------------------------------------------------

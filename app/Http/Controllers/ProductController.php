@@ -237,7 +237,8 @@ class ProductController extends Controller
             if ($product->img_path) {
                 Storage::delete($product->img_path);
             }
-
+            
+            // $product = Product::findOrfail($request->id);
             $product->delete();
 
             DB::commit();
@@ -246,7 +247,7 @@ class ProductController extends Controller
                 return Response::json(['status' => 'success', 'message' => 'Product deleted successfully']);
             }
 
-            return redirect()->route('products.index')->with('success', 'Product deleted successfully');
+            // return redirect()->route('products.index')->with('success', 'Product deleted successfully');
         } catch (\Exception $e) {
             DB::rollback();
             
